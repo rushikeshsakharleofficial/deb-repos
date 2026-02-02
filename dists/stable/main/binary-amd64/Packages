@@ -25,3 +25,30 @@ Description: Fast parallel log rotation utility
   - Dry-run mode
   - Preserves file permissions and ownership
 
+Package: hello
+Version: 2.10-3build1
+Architecture: amd64
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Installed-Size: 104
+Depends: libc6 (>= 2.38)
+Conflicts: hello-traditional
+Breaks: hello-debhelper (<< 2.9)
+Replaces: hello-debhelper (<< 2.9), hello-traditional
+Filename: pool/main/h/hello_2.10-3build1_amd64.deb
+Size: 26006
+MD5sum: a8c3bcd3c6cc4039a774bae2c1d3cb99
+SHA1: 5766f9c21afcace4669cdb6f110bb564a009974b
+SHA256: e68cf4365b7aa9c4e2af4af6eee1710d6f967059b7b4af62786e8870d7366333
+Section: devel
+Priority: optional
+Homepage: https://www.gnu.org/software/hello/
+Description: example package based on GNU hello
+ The GNU hello program produces a familiar, friendly greeting.  It
+ allows non-programmers to use a classic computer science tool which
+ would otherwise be unavailable to them.
+ .
+ Seriously, though: this is an example of how to do a Debian package.
+ It is the Debian version of the GNU Project's `hello world' program
+ (which is itself an example for the GNU Project).
+Original-Maintainer: Santiago Vila <sanvila@debian.org>
+
