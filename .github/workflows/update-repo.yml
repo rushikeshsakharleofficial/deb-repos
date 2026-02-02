@@ -1,0 +1,90 @@
+name: Update DEB Repository
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pool/**'
+  workflow_dispatch:
+
+jobs:
+  update-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Packages files
+        run: |
+          cd $GITHUB_WORKSPACE
+
+          # Generate amd64 Packages
+          mkdir -p dists/stable/main/binary-amd64
+          dpkg-scanpackages --arch amd64 pool/ > dists/stable/main/binary-amd64/Packages
+          gzip -k -f dists/stable/main/binary-amd64/Packages
+
+          # Generate arm64 Packages
+          mkdir -p dists/stable/main/binary-arm64
+          dpkg-scanpackages --arch arm64 pool/ > dists/stable/main/binary-arm64/Packages
+          gzip -k -f dists/stable/main/binary-arm64/Packages
+
+          # Generate Release file
+          cd dists/stable
+          cat > Release << EOF
+          Origin: Linux Hardened
+          Label: Linux Hardened
+          Suite: stable
+          Codename: stable
+          Architectures: amd64 arm64
+          Components: main
+          Description: Linux Hardened DEB Repository
+          EOF
+
+          # Add checksums
+          echo "MD5Sum:" >> Release
+          for f in main/binary-*/Packages*; do
+            echo " $(md5sum $f | cut -d' ' -f1) $(wc -c < $f) $f" >> Release
+          done
+          echo "SHA256:" >> Release
+          for f in main/binary-*/Packages*; do
+            echo " $(sha256sum $f | cut -d' ' -f1) $(wc -c < $f) $f" >> Release
+          done
+
+      - name: Generate index.html files
+        run: |
+          generate_index() {
+            local dir="$1"
+            local url_path="$2"
+            local index_file="${dir}index.html"
+            cat > "$index_file" << EOF
+          <!DOCTYPE html>
+          <html><head><title>Index of $url_path</title>
+          <style>body{font-family:monospace;background:#fff;color:#000;margin:20px}
+          h1{font-size:1.2em}hr{border:none;border-top:1px solid #ccc}
+          table{border-collapse:collapse}th,td{text-align:left;padding:4px 15px 4px 0}
+          a{color:#0000ee;text-decoration:none}a:hover{text-decoration:underline}
+          .size{color:#666}</style></head><body>
+          <h1>Index of $url_path</h1><hr><table>
+          <tr><th>Name</th><th>Size</th></tr>
+          EOF
+            [ "$url_path" != "/" ] && echo '<tr><td><a href="../">../</a></td><td class="size">-</td></tr>' >> "$index_file"
+            for item in "$dir"*/; do
+              [ -d "$item" ] && echo "<tr><td><a href=\"$(basename "$item")/\">$(basename "$item")/</a></td><td class=\"size\">-</td></tr>" >> "$index_file"
+            done
+            for item in "$dir"*; do
+              [ -f "$item" ] && [ "$(basename "$item")" != "index.html" ] && echo "<tr><td><a href=\"$(basename "$item")\">$(basename "$item")</a></td><td class=\"size\">$(du -h "$item" | cut -f1)</td></tr>" >> "$index_file"
+            done
+            echo '</table><hr></body></html>' >> "$index_file"
+          }
+          find pool dists -type d | while read dir; do generate_index "$dir/" "/$dir"; done
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "Update repository metadata [skip ci]"
+          git push
