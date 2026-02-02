@@ -52,3 +52,20 @@ Description: example package based on GNU hello
  (which is itself an example for the GNU Project).
 Original-Maintainer: Santiago Vila <sanvila@debian.org>
 
+Package: vib
+Version: 1.0.0
+Architecture: amd64
+Maintainer: Rushikesh Sakharle <rushikesh.sakharle@linuxhardened.com>
+Filename: pool/main/v/vib_1.0.0-1_amd64.deb
+Size: 711994
+MD5sum: 458d631d571761a3df340f054ddcbf9f
+SHA1: f910fa8fc5040a2ab6d60e205dc1ef488085051c
+SHA256: 41809f36f881ab000bf39bf7acd363c14e1310858c22152d7fc05486d446ba90
+Section: utils
+Priority: optional
+Homepage: https://github.com/rushikeshsakharleofficial/global-sys-utils
+Description: Backup files before editing with vim/nano
+ vib (Vim Backup) automatically creates timestamped backups of files
+ before opening them in an editor. Written in Go with zero external
+ dependencies. Preserves file permissions and ownership.
+
